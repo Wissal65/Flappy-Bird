@@ -1,5 +1,5 @@
 import React, { useEffect,useState } from 'react'
-import { Image, StyleSheet, Platform, View } from 'react-native';
+import { Image, StyleSheet, Platform, View ,TouchableOpacity,Text} from 'react-native';
 
 import { HelloWave } from '@/components/HelloWave';
 import { useNavigation } from '@react-navigation/native';
@@ -9,66 +9,52 @@ import { StatusBar } from 'expo-status-bar';
 import entities from '@/entities/index2';
 import Physics from '@/physics';
 
-export default function HomeScreen() {
-  const [running, setRunning] = useState(false);
-  const navigation = useNavigation();
+export default function App() {
+  const [running, setRunning] = useState(false)
+  const [gameEngine, setGameEngine] = useState(null)
+  const [currentPoints, setCurrentPoints] = useState(0)
   useEffect(() => {
-      const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
-      const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-  
-      // Hide tab bar when entering the screen
-      hideTabBar();
-  
-      // Show tab bar when leaving the screen
-      return () => showTabBar();
-    }, [navigation]);
-    useEffect(() => {
-      const hideTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'none' } });
-      const showTabBar = () => navigation.setOptions({ tabBarStyle: { display: 'flex' } });
-  
-      // Hide tab bar when entering the screen
-      hideTabBar();
-  
-      // Show tab bar when leaving the screen
-      return () => showTabBar();
-    }, [navigation]);
-
-    useEffect(() => {
-
-    setRunning(true);
-    }, []);
-    
+    setRunning(false)
+  }, [])
   return (
-<View style={{flex:1}}>
-<GameEngine 
-systems={[Physics]}
-entities={entities()}
-running={running}
-style={{position:'absolute',
-  top:0,left:0,right:0,bottom:0,
-}}>
+    <View style={{ flex: 1 }}>
+      <Text style={{ textAlign: 'center', fontSize: 40, fontWeight: 'bold', margin: 20 }}>{currentPoints}</Text>
+      <GameEngine
+        ref={(ref) => { setGameEngine(ref) }}
+        systems={[Physics]}
+        entities={entities()}
+        running={running}
+        onEvent={(e) => {
+          switch (e.type) {
+            case 'game_over':
+              setRunning(false)
+              gameEngine.stop()
+              break;
+            case 'new_point':
+              setCurrentPoints(currentPoints + 1)
+              break;
+          }
+        }}
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}
+      >
+        <StatusBar style="auto" hidden={true} />
 
-</GameEngine>
-<StatusBar style='auto' hidden={true}/>
-</View>
+      </GameEngine>
+
+      {!running ?
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <TouchableOpacity style={{ backgroundColor: 'black', paddingHorizontal: 30, paddingVertical: 10 }}
+            onPress={() => {
+              setCurrentPoints(0)
+              setRunning(true)
+              gameEngine.swap(entities())
+            }}>
+            <Text style={{ fontWeight: 'bold', color: 'white', fontSize: 30 }}>
+              START GAME
+            </Text>
+          </TouchableOpacity>
+
+        </View> : null}
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
