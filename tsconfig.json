@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-, "physics.tsx"  ]
+, "physics.tsx", "components/Floor.js"  ]
 }
